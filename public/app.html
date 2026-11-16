@@ -71,10 +71,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Nzembo — Studio de Création Musicale IA</title>
-  <link rel="icon" href="public/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
   <!-- PWA Meta Tags & Manifest -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#7C3AED">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -101,19 +101,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 
   <!-- Shared Real-time Store between app and admin -->
-  <script src="./shared-store.js"></script>
-  <script src="../shared-store.js"></script>
+  <script src="/shared-store.js"></script>
   <!-- Dictionnaire des Styles Musicaux Nzembo v2 (Support universel ES Module & Script Classique) -->
-  <script src="./musicStylesDictionary.browser.js"></script>
-  <script type="module" src="./musicStylesDictionary.js"></script>
+  <script src="/musicStylesDictionary.browser.js"></script>
+  <script type="module" src="/musicStylesDictionary.js"></script>
   <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Variables d'environnement locales (ignorées par Git) -->
-  <script src="./env.local.js"></script>
-  <script src="../env.local.js"></script>
+  <!-- Variables d'environnement (locales ou servies par /env.local.js) -->
+  <script src="/env.local.js"></script>
   <!-- Nzembo Client Backend (Supabase Cloud + AI Engine) -->
-  <script src="./nzembo-client.js"></script>
-  <script src="../nzembo-client.js"></script>
+  <script src="/nzembo-client.js"></script>
 
   <!-- Tailwind CSS CDN with dark mode support -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -791,7 +788,7 @@
     <div class="bg-white dark:bg-[#1A122B] border border-slate-200 dark:border-purple-800/60 rounded-3xl p-4 w-full max-w-sm shadow-2xl space-y-3 animate-in fade-in zoom-in-95 duration-150">
       <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-purple-900/40">
         <div class="flex items-center gap-2.5 min-w-0">
-          <img id="mob-menu-song-cover" src="public/favicon.svg" alt="Pochette" class="w-9 h-9 rounded-xl object-cover border border-purple-200 dark:border-purple-800 flex-shrink-0">
+          <img id="mob-menu-song-cover" src="/favicon.svg" alt="Pochette" class="w-9 h-9 rounded-xl object-cover border border-purple-200 dark:border-purple-800 flex-shrink-0">
           <div class="min-w-0">
             <h4 id="mob-menu-song-title" class="text-xs font-bold text-slate-900 dark:text-white truncate">Actions sur le morceau</h4>
             <p id="mob-menu-song-style" class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Nzembo Studio</p>
@@ -2060,7 +2057,7 @@
           <div class="bg-white dark:bg-[#1A122B] p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-purple-900/40 shadow-sm">
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-3">
-                <img id="player-album-cover" src="public/favicon.svg" alt="Pochette" class="w-12 h-12 rounded-xl object-cover border border-purple-200 dark:border-purple-800 shadow-sm hidden">
+                <img id="player-album-cover" src="/favicon.svg" alt="Pochette" class="w-12 h-12 rounded-xl object-cover border border-purple-200 dark:border-purple-800 shadow-sm hidden">
                 <div>
                   <span id="player-style-badge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-100 text-nzembo-violet dark:bg-purple-900/50 dark:text-cyan-300 border border-purple-200 dark:border-purple-700/50">Afrobeat</span>
                   <h4 id="player-song-title" class="font-bold text-slate-900 dark:text-white text-base mt-1">Titre de la chanson</h4>
@@ -3650,7 +3647,7 @@
     // Register PWA Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
       });
     }
 
@@ -11462,7 +11459,7 @@
         window._activePlayingAudioUrl = audioUrl;
         realAudio.dataset.trackTitle = title || 'Nzembo Studio';
         realAudio.dataset.trackArtist = artist || 'Studio IA';
-        realAudio.dataset.trackCover = coverUrl || 'public/favicon.svg';
+        realAudio.dataset.trackCover = coverUrl || '/favicon.svg';
 
         if (!isMatchingAudioTrackUrl(realAudio.src, audioUrl)) {
           realAudio.src = audioUrl;
@@ -13731,7 +13728,7 @@
       const activeId = window._activePlayingSongId ? String(window._activePlayingSongId) : '';
 
       container.innerHTML = audioSongs.slice(0, 4).map(s => {
-        const coverSrc = s.albumCover || s.coverUrl || s.cover_url || (typeof getDefaultSongCover === 'function' ? getDefaultSongCover(s.style, s.occasion) : 'public/favicon.svg');
+        const coverSrc = s.albumCover || s.coverUrl || s.cover_url || (typeof getDefaultSongCover === 'function' ? getDefaultSongCover(s.style, s.occasion) : '/favicon.svg');
         const songAudio = s.audioUrl || s.audio_url || s.audioUrl2 || s.vocalUrl || s.instrumentalUrl || '';
         const rawSongId = String(s.id || s.taskId || '');
         const escapedAudio = (songAudio || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -16183,7 +16180,7 @@
       ensureGlobalCardAudioListeners(realAudio);
 
       const latestTitle = (item && item.title) ? item.title : (title || 'Création Nzembo');
-      const latestCover = (item && (item.albumCover || item.coverUrl || item.cover_url)) ? (item.albumCover || item.coverUrl || item.cover_url) : (coverUrl || 'public/favicon.svg');
+      const latestCover = (item && (item.albumCover || item.coverUrl || item.cover_url)) ? (item.albumCover || item.coverUrl || item.cover_url) : (coverUrl || '/favicon.svg');
       const isSameSong = (String(window._activePlayingSongId) === String(songId) || String(_activeCardSongId) === String(songId)) && isMatchingAudioTrackUrl(realAudio.src, audioUrl);
 
       if (isSameSong && !realAudio.paused) {
@@ -16260,7 +16257,7 @@
       <!-- Miniature et Titres -->
       <div class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer" onclick="switchTab('songs')">
         <div class="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-purple-200 dark:border-purple-800">
-          <img id="floating-player-cover" src="public/favicon.svg" alt="Pochette" class="w-full h-full object-cover">
+          <img id="floating-player-cover" src="/favicon.svg" alt="Pochette" class="w-full h-full object-cover">
           <div id="floating-player-waves" class="absolute inset-0 bg-black/40 flex items-center justify-center gap-0.5 hidden">
             <span class="w-1 bg-cyan-400 h-3 animate-pulse"></span>
             <span class="w-1 bg-cyan-400 h-5 animate-pulse delay-75"></span>
@@ -16296,5 +16293,18 @@
     </div>
   </div>
 
+  <script>
+    (function() {
+      try {
+        var h = window.location.hostname || "";
+        if (/^app\./i.test(h)) {
+          var rootUrl = window.location.protocol + "//" + h.replace(/^app\./i, "") + "/";
+          document.querySelectorAll("[data-nzembo-landing-link]").forEach(function(el) {
+            el.setAttribute("href", rootUrl);
+          });
+        }
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>

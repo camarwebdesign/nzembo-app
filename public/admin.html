@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Nzembo — Administration & Back-Office Studio</title>
-  <link rel="icon" href="../app.nzembo.com/public/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
   <!-- Immediate Theme Check to avoid flash -->
   <script>
@@ -87,11 +87,11 @@
   </style>
 
   <!-- Inclusion du moteur de données partagé réactif -->
-  <script src="../shared-store.js"></script>
+  <script src="/shared-store.js"></script>
   <!-- Variables d'environnement locales (ignorées par Git) -->
-  <script src="../env.local.js"></script>
+  <script src="/env.local.js"></script>
   <!-- Client Neon Database direct -->
-  <script src="../nzembo-client.js"></script>
+  <script src="/nzembo-client.js"></script>
 </head>
 <body class="bg-slate-50 dark:bg-nzembo-night text-slate-900 dark:text-slate-100 min-h-screen flex antialiased">
 
@@ -187,7 +187,7 @@
           </p>
         </div>
       </div>
-      <a href="../app.nzembo.com/index.html" target="_blank" class="p-1.5 rounded-lg text-slate-400 hover:text-nzembo-violet dark:hover:text-cyan-400 hover:bg-slate-100 dark:hover:bg-purple-950/60 transition-colors" title="Ouvrir l'application Studio">
+      <a href="/app" data-nzembo-app-link="1" target="_blank" class="p-1.5 rounded-lg text-slate-400 hover:text-nzembo-violet dark:hover:text-cyan-400 hover:bg-slate-100 dark:hover:bg-purple-950/60 transition-colors" title="Ouvrir l'application Studio">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
       </a>
     </div>
@@ -1224,6 +1224,19 @@
         triggerToast('Mise à jour en temps réel : transaction synchronisée.', 'info');
       });
     });
+  </script>
+  <script>
+    (function() {
+      try {
+        var h = window.location.hostname || "";
+        if (/^admin\./i.test(h)) {
+          var appUrl = window.location.protocol + "//" + h.replace(/^admin\./i, "app.") + "/";
+          document.querySelectorAll("[data-nzembo-app-link]").forEach(function(el) {
+            el.setAttribute("href", appUrl);
+          });
+        }
+      } catch (e) {}
+    })();
   </script>
 </body>
 </html>

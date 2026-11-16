@@ -208,7 +208,21 @@ function sanitizeFrontendReturnUrl(rawUrl) {
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
       return defaultAppUrl;
     }
-    const allowedHosts = new Set(['localhost', '127.0.0.1', 'app.nzembo.com', 'nzembo.com']);
+    const allowedHosts = new Set([
+      'localhost',
+      '127.0.0.1',
+      'app.nzembo.com',
+      'nzembo.com',
+      'www.nzembo.com',
+      'admin.nzembo.com',
+      'app.nzembo.net',
+      'nzembo.net',
+      'www.nzembo.net',
+      'admin.nzembo.net'
+    ]);
+    if (process.env.VERCEL_URL) {
+      allowedHosts.add(String(process.env.VERCEL_URL).replace(/^https?:\/\//i, '').split('/')[0]);
+    }
     try {
       allowedHosts.add(new URL(defaultAppUrl).hostname);
     } catch {}

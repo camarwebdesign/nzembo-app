@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { pool, query, initDb } = require('./db');
 const { registerSaspayRoutes } = require('./saspay');
 
@@ -195,14 +196,32 @@ app.get('/api/songs/user/:userId', async (req, res) => {
 // ================= PAIEMENTS SASPAY =================
 registerSaspayRoutes(app);
 
-// Démarrage du serveur
-initDb().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Serveur Nzembo connecté à Neon DB et démarré sur http://localhost:${PORT}`);
+let dbReadyPromise = null;
+function ensureDbReady() {
+  if (!dbReadyPromise) {
+    dbReadyPromise = initDb().catch((err) => {
+      dbReadyPromise = null;
+      throw err;
+    });
+  }
+  return dbReadyPromise;
+}
+
+if (require.main === module) {
+  initDb().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Serveur Nzembo connecté à Neon DB et démarré sur http://localhost:${PORT}`);
+    });
+  }).catch(err => {
+    console.error('Impossible de démarrer le serveur sans connexion Neon:', err);
+    app.listen(PORT, () => {
+      console.log(`⚠️ Serveur Nzembo démarré sur http://localhost:${PORT} (Mode secours local)`);
+    });
   });
-}).catch(err => {
-  console.error('Impossible de démarrer le serveur sans connexion Neon:', err);
-  app.listen(PORT, () => {
-    console.log(`⚠️ Serveur Nzembo démarré sur http://localhost:${PORT} (Mode secours local)`);
-  });
-});
+}
+
+module.exports = {
+  app,
+  initDb,
+  ensureDbReady
+};

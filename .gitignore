@@ -6,6 +6,7 @@ node_modules/
 .env.*
 !.env.example
 env.local.js
+public/env.local.js
 *.pem
 *.key
 *.p12
@@ -16,7 +17,7 @@ env.local.js
 *serviceAccount*.json
 *credentials*.json
 
-# Build & framework caches (Next.js / Vercel / TypeScript)
+# Build & deployment caches
 .next/
 out/
 build/
