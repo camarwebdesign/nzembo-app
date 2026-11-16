@@ -101,6 +101,35 @@ async function initDb() {
       );
     `);
 
+    // 6. Table Sessions & Paiements SasPay (idempotente)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS payment_transactions (
+        id VARCHAR(80) PRIMARY KEY,
+        provider VARCHAR(30) DEFAULT 'saspay',
+        checkout_session_id VARCHAR(120) UNIQUE,
+        saspay_slug VARCHAR(255),
+        saspay_payment_id VARCHAR(120),
+        saspay_reference VARCHAR(120),
+        user_id VARCHAR(100) NOT NULL,
+        user_email VARCHAR(150),
+        user_name VARCHAR(120),
+        pack_id VARCHAR(80),
+        pack_name VARCHAR(150),
+        credits INT NOT NULL,
+        amount NUMERIC(15, 2) NOT NULL,
+        currency VARCHAR(10) NOT NULL,
+        promo_code VARCHAR(50),
+        frontend_return_url TEXT,
+        checkout_url TEXT,
+        status VARCHAR(40) DEFAULT 'PENDING',
+        credited BOOLEAN DEFAULT FALSE,
+        credited_at TIMESTAMP,
+        raw_payload JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Insérer l'utilisateur démo par défaut si absent
     await client.query(`
       INSERT INTO users (id, name, email, credits, role, referral_code)

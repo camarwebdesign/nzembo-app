@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { pool, query, initDb } = require('./db');
+const { registerSaspayRoutes } = require('./saspay');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +11,11 @@ const SUNO_KEY = process.env.SUNO_API_KEY || '';
 const SUNO_BASE = 'https://apibox.erweima.ai/api/v1';
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+  verify: (req, _res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 
 // ================= TEST DE SANTÉ =================
 app.get('/api/health', async (req, res) => {
@@ -21,7 +26,8 @@ app.get('/api/health', async (req, res) => {
       service: 'Nzembo API Backend (Suno AI Engine)',
       neon_database: 'connected',
       db_time: dbRes.rows[0].now,
-      suno_configured: !!SUNO_KEY
+      suno_configured: !!SUNO_KEY,
+      saspay_configured: Boolean((process.env.SASPAY_SECRET_KEY || '').trim())
     });
   } catch (err) {
     res.status(500).json({
@@ -185,6 +191,9 @@ app.get('/api/songs/user/:userId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ================= PAIEMENTS SASPAY =================
+registerSaspayRoutes(app);
 
 // Démarrage du serveur
 initDb().then(() => {

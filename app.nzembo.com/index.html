@@ -2533,7 +2533,7 @@
                 </div>
 
                 <!-- Bouton de paiement direct -->
-                <button onclick="buyCustomCreditQuantity()" class="btn-gradient py-3 px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 hover:scale-[1.02] active:scale-95 transition-transform flex-shrink-0">
+                <button onclick="buyCustomCreditQuantity(this)" class="btn-gradient py-3 px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 hover:scale-[1.02] active:scale-95 transition-transform flex-shrink-0">
                   
                   <span>Acheter maintenant</span>
                 </button>
@@ -2677,7 +2677,7 @@
                 <span id="profile-custom-credit-cost" class="text-xs sm:text-sm font-black text-nzembo-violet dark:text-cyan-300">$8.00 USD</span>
                 <span id="profile-custom-credit-cdf" class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline"></span>
               </div>
-              <button onclick="buyProfileCustomCredits()" class="btn-gradient w-full sm:w-auto py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md sm:ml-auto cursor-pointer">
+              <button onclick="buyProfileCustomCredits(this)" class="btn-gradient w-full sm:w-auto py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md sm:ml-auto cursor-pointer">
                 <span class="sm:hidden">Payer</span><span class="hidden sm:inline">Payer et Créditer mon compte</span>
               </button>
             </div>
@@ -4868,51 +4868,25 @@
     }
 
     function applyPromoCode() {
-      const code = document.getElementById('promo-code-input').value.trim();
+      const code = document.getElementById('promo-code-input').value.trim().toUpperCase();
       if (!code) {
         triggerToast('Veuillez entrer un code promo.', 'error');
         return;
       }
-      triggerToast(`Code promo « ${code.toUpperCase()} » appliqué ! -15% déduits.`, 'success');
+      if (code === 'NZEMBO' || code === 'PROMO15') {
+        window._activePromoCode = code;
+        triggerToast(`Code promo « ${code} » appliqué ! -15% seront déduits au paiement.`, 'success');
+      } else {
+        window._activePromoCode = '';
+        triggerToast(`Code promo « ${code} » invalide.`, 'error');
+      }
     }
 
-    function buyCreditPack(packName, creditsAmount) {
-      let packType = 'decouverte';
-      let priceCDF = 2000;
-      let priceUSD = 0.70;
-      const added = Math.max(0, Number(creditsAmount) || 0);
-
-      if (packName.includes('Créateur') || added === 4) {
-        packType = 'createur';
-        priceCDF = 10000;
-        priceUSD = 3.50;
-      } else if (packName.includes('Premium') || added === 12) {
-        packType = 'premium';
-        priceCDF = 25000;
-        priceUSD = 8.75;
+    function buyCreditPack(packName, creditsAmount, triggerBtn) {
+      const added = Math.max(1, Number(creditsAmount) || 1);
+      if (typeof buyCreditQuantity === 'function') {
+        buyCreditQuantity(added, packName, triggerBtn);
       }
-
-      // Synchroniser la base avant d'ajouter pour éviter tout saut incohérent
-      if (window.NzemboStore && typeof window.NzemboStore.setUserCredits === 'function') {
-        window.NzemboStore.setUserCredits(userCredits);
-      }
-      if (window.NzemboStore && typeof window.NzemboStore.recordCreditPurchase === 'function') {
-        const updated = window.NzemboStore.recordCreditPurchase(packType, packName, added, priceUSD, priceCDF, 'Mobile Money (Instantané)');
-        userCredits = updated.userAccount.credits;
-      } else {
-        userCredits = Math.max(0, Number(userCredits || 0)) + added;
-      }
-      window.userCredits = userCredits;
-      try {
-        localStorage.setItem('nzembo_user_credits', String(userCredits));
-      } catch (e) {}
-      if (window.NzemboBackend && typeof window.NzemboBackend.setUserCredits === 'function') {
-        window.NzemboBackend.setUserCredits(userCredits).catch(() => {});
-      }
-
-      updateCreditDisplays(userCredits);
-      updateReferralProfileUI();
-      triggerToast(`Recharge réussie : +${added} crédits (${packName})`, 'success');
     }
 
     function updateCreditDisplays(explicitValue) {
@@ -12766,43 +12740,187 @@
       switchTab('songs');
     }
 
-    // ACHAT DE CRÉDITS FLEXIBLES (OFFRE UNIQUE 0,80 $ / CRÉDIT)
-    function buyCreditQuantity(qty, packLabel = 'Recharge Crédits') {
-      const added = Math.max(0, Number(qty) || 0);
-      const priceUSD = +(added * 0.80).toFixed(2);
-      const priceCDF = Math.round(added * 2280);
-
-      // Aligner le store sur le solde courant réel avant d'ajouter
-      if (window.NzemboStore && typeof window.NzemboStore.setUserCredits === 'function') {
-        window.NzemboStore.setUserCredits(userCredits);
+    // ACHAT DE CRÉDITS FLEXIBLES VIA SASPAY (OFFRE UNIQUE 0,80 $ / CRÉDIT)
+    function getNzemboBackendBase() {
+      if (typeof window !== 'undefined' && window.__NZEMBO_ENV__ && window.__NZEMBO_ENV__.BACKEND_URL) {
+        return String(window.__NZEMBO_ENV__.BACKEND_URL).replace(/\/+$/, '');
       }
-      if (window.NzemboStore && typeof window.NzemboStore.recordCreditPurchase === 'function') {
-        const updated = window.NzemboStore.recordCreditPurchase('unique', packLabel, added, priceUSD, priceCDF, 'Mobile Money (Instantané)');
-        userCredits = updated.userAccount.credits;
-      } else {
-        userCredits = Math.max(0, Number(userCredits || 0)) + added;
+      if (typeof window !== 'undefined' && window.location) {
+        const host = window.location.hostname;
+        if (!host || host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:') {
+          return 'http://localhost:3000';
+        }
+        return window.location.origin;
       }
-      window.userCredits = userCredits;
-      try {
-        localStorage.setItem('nzembo_user_credits', String(userCredits));
-      } catch (e) {}
-      if (window.NzemboBackend && typeof window.NzemboBackend.setUserCredits === 'function') {
-        window.NzemboBackend.setUserCredits(userCredits).catch(() => {});
-      }
-
-      updateCreditDisplays(userCredits);
-      updateReferralProfileUI();
-      triggerToast(`Recharge réussie : +${added} crédits (${packLabel})`, 'success');
+      return 'http://localhost:3000';
     }
 
-    function buyCustomCreditQuantity() {
+    async function startSaspayCheckout({ credits, packId = 'custom_credits', packName = 'Recharge Crédits', currency, triggerBtn = null }) {
+      const qty = parseInt(credits, 10);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 1000) {
+        triggerToast('Veuillez entrer une quantité valide de crédits (1 à 1000).', 'error');
+        return;
+      }
+      if (window._saspayCheckoutInProgress) return;
+
+      const currentUser = (window.NzemboBackend && typeof window.NzemboBackend.getCurrentUser === 'function')
+        ? window.NzemboBackend.getCurrentUser()
+        : null;
+      const sbConfigured = Boolean(window.NzemboBackend && typeof window.NzemboBackend.getSupabase === 'function' && window.NzemboBackend.getSupabase());
+
+      if ((!currentUser || !currentUser.id) && sbConfigured) {
+        triggerToast('Veuillez vous connecter à votre compte avant d\'acheter des crédits.', 'error');
+        if (typeof showAuthModal === 'function') showAuthModal();
+        return;
+      }
+
+      const activeUser = (currentUser && currentUser.id)
+        ? currentUser
+        : { id: 'usr_84920', email: 'demo@nzembo.com', name: 'Utilisateur Démo' };
+
+      const btn = triggerBtn || null;
+      const originalHtml = btn ? btn.innerHTML : '';
+      window._saspayCheckoutInProgress = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Redirection vers SasPay...</span>';
+      }
+
+      try {
+        triggerToast(`Initialisation du paiement sécurisé SasPay pour ${qty} crédit(s)...`, 'info');
+        const backendUrl = getNzemboBackendBase();
+        const returnBase = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+          ? (window.location.origin + window.location.pathname)
+          : 'http://localhost:3001';
+
+        const response = await fetch(`${backendUrl}/api/payments/saspay/checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: activeUser.id,
+            user_email: activeUser.email || '',
+            user_name: activeUser.name || 'Créateur Nzembo',
+            pack_id: packId,
+            pack_name: packName,
+            credits: qty,
+            currency: currency || currentCurrency || 'USD',
+            promo_code: window._activePromoCode || '',
+            frontend_return_url: returnBase
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success || !data.checkoutUrl || !/^https?:\/\//i.test(data.checkoutUrl)) {
+          throw new Error(data.error || 'Impossible de générer le lien de paiement SasPay.');
+        }
+
+        try {
+          localStorage.setItem('nzembo_pending_saspay_order', data.orderId);
+        } catch (e) {}
+
+        window.location.href = data.checkoutUrl;
+      } catch (err) {
+        triggerToast(err.message || 'Erreur lors de la connexion au serveur de paiement.', 'error');
+        window._saspayCheckoutInProgress = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      }
+    }
+
+    async function verifySaspayOrderFromBackend(orderId, attempt = 0) {
+      if (!orderId) return;
+      const backendUrl = getNzemboBackendBase();
+      try {
+        const res = await fetch(`${backendUrl}/api/payments/saspay/verify/${encodeURIComponent(orderId)}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Vérification SasPay impossible.');
+        }
+
+        if (data.verified && data.status === 'SUCCESS') {
+          let syncedOrders = [];
+          try {
+            syncedOrders = JSON.parse(localStorage.getItem('nzembo_saspay_synced_orders') || '[]');
+          } catch (e) { syncedOrders = []; }
+
+          const added = Math.max(0, Number(data.credits) || 0);
+          const serverBal = Math.max(0, Number(data.balance) || 0);
+          let finalBalance = Math.max(serverBal, Number(userCredits || 0));
+
+          if (!syncedOrders.includes(orderId)) {
+            finalBalance = Math.max(serverBal, Number(userCredits || 0) + added);
+            syncedOrders.push(orderId);
+            try {
+              localStorage.setItem('nzembo_saspay_synced_orders', JSON.stringify(syncedOrders.slice(-50)));
+              localStorage.removeItem('nzembo_pending_saspay_order');
+            } catch (e) {}
+
+            userCredits = finalBalance;
+            window.userCredits = finalBalance;
+            if (window.NzemboBackend && typeof window.NzemboBackend.setUserCredits === 'function') {
+              await window.NzemboBackend.setUserCredits(finalBalance).catch(() => {});
+            } else {
+              try { localStorage.setItem('nzembo_user_credits', String(finalBalance)); } catch (e) {}
+            }
+            if (window.NzemboStore && typeof window.NzemboStore.playChime === 'function') {
+              window.NzemboStore.playChime('money');
+            }
+          } else {
+            userCredits = finalBalance;
+            window.userCredits = finalBalance;
+          }
+
+          updateCreditDisplays(userCredits);
+          updateReferralProfileUI();
+          triggerToast(`Paiement SasPay confirmé ! +${added} crédits ajoutés. Nouveau solde : ${userCredits} crédits.`, 'success');
+          try {
+            window.history.replaceState(null, '', window.location.pathname + '#credits');
+          } catch (e) {}
+          return;
+        }
+
+        if (data.status === 'PENDING') {
+          if (attempt === 0) {
+            triggerToast('Paiement en attente de confirmation SasPay...', 'info');
+          }
+          if (attempt < 5) {
+            setTimeout(() => verifySaspayOrderFromBackend(orderId, attempt + 1), 3000);
+          }
+          return;
+        }
+
+        try { localStorage.removeItem('nzembo_pending_saspay_order'); } catch (e) {}
+        triggerToast('Le paiement SasPay n\'a pas abouti ou a été annulé.', 'error');
+        try {
+          window.history.replaceState(null, '', window.location.pathname + '#credits');
+        } catch (e) {}
+      } catch (err) {
+        if (attempt === 0) {
+          triggerToast(err.message || 'Erreur lors de la vérification du paiement SasPay.', 'error');
+        }
+      }
+    }
+
+    function buyCreditQuantity(qty, packLabel = 'Recharge Crédits', triggerBtn = null) {
+      startSaspayCheckout({
+        credits: qty,
+        packId: 'custom_credits',
+        packName: packLabel,
+        currency: currentCurrency,
+        triggerBtn
+      });
+    }
+
+    function buyCustomCreditQuantity(triggerBtn = null) {
       const input = document.getElementById('custom-credits-input');
       const qty = parseInt(input.value, 10);
       if (isNaN(qty) || qty <= 0) {
         triggerToast('Veuillez entrer une quantité valide de crédits.', 'error');
         return;
       }
-      buyCreditQuantity(qty, `Recharge ${qty} Crédits`);
+      buyCreditQuantity(qty, `Recharge ${qty} Crédits`, triggerBtn);
     }
 
     function updateCustomCreditPrice() {
@@ -12836,14 +12954,14 @@
       }
     }
 
-    function buyProfileCustomCredits() {
+    function buyProfileCustomCredits(triggerBtn = null) {
       const input = document.getElementById('profile-custom-credits-input');
       const qty = parseInt(input?.value, 10);
       if (isNaN(qty) || qty <= 0) {
         triggerToast('Veuillez entrer une quantité valide de crédits.', 'error');
         return;
       }
-      buyCreditQuantity(qty, `Recharge Profil ${qty} Crédits`);
+      buyCreditQuantity(qty, `Recharge Profil ${qty} Crédits`, triggerBtn);
     }
 
     function setQuickCreditsInput(qty) {
@@ -14782,8 +14900,17 @@
         document.getElementById('char-count').className = len < 10 ? 'text-xs text-rose-500' : 'text-xs text-slate-400';
       });
 
-      // VÉRIFICATION D'UN LIEN DE STREAMING PARTAGÉ (?stream=...&track=...)
+      // VÉRIFICATION D'UN RETOUR DE PAIEMENT SASPAY (?payment=saspay&order_id=...)
       const urlParams = new URLSearchParams(window.location.search);
+      const saspayPaymentParam = urlParams.get('payment');
+      const saspayOrderId = urlParams.get('order_id') || (saspayPaymentParam === 'saspay' ? localStorage.getItem('nzembo_pending_saspay_order') : null);
+      if (saspayPaymentParam === 'saspay' && saspayOrderId) {
+        setTimeout(() => {
+          verifySaspayOrderFromBackend(saspayOrderId, 0);
+        }, 400);
+      }
+
+      // VÉRIFICATION D'UN LIEN DE STREAMING PARTAGÉ (?stream=...&track=...)
       const streamUrl = urlParams.get('stream');
       const trackName = urlParams.get('track');
       if (streamUrl) {
