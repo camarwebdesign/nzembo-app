@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nzembo-violet: #7C3AED;
+  --color-nzembo-cyan: #06B6D4;
+  --color-nzembo-violet-deep: #5B21B6;
+  --color-nzembo-indigo: #4F46E5;
+  --color-nzembo-night: #0F0A1A;
+  --color-nzembo-dark: #1A1025;
+  --color-nzembo-card: #2D2640;
+  --color-nzembo-text: #FFFFFF;
+  --color-nzembo-muted: #A89EC2;
+  --color-nzembo-subtle: #6B5F82;
+  --color-nzembo-success: #10B981;
+  --color-nzembo-error: #EF4444;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Shimmer Animation for Skeleton Loaders */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: #E2E8F0;
+}
+
+.dark .shimmer {
+  background-color: #261E38;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+.dark .shimmer::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(124, 58, 237, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(124, 58, 237, 0.5), 0 0 35px rgba(6, 182, 212, 0.2); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+.animate-pulse-glow { animation: pulseGlow 2.5s ease-in-out infinite; }
+
+.gradient-text {
+  background: linear-gradient(135deg, #7C3AED, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #7C3AED, #06B6D4);
+  color: white;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-gradient:hover {
+  box-shadow: 0 6px 22px rgba(124, 58, 237, 0.4);
+  transform: translateY(-1px);
+}
+.btn-gradient:active { transform: scale(0.98); }
+.btn-gradient:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.nz-card {
+  background: white;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.dark .nz-card {
+  background: rgba(45, 38, 64, 0.5);
+  border-color: rgba(124, 58, 237, 0.15);
+  box-shadow: none;
+}
+
+.nz-input {
+  width: 100%;
+  background: white;
+  border: 1px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #0F172A;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.dark .nz-input {
+  background: rgba(45, 38, 64, 0.6);
+  border-color: rgba(124, 58, 237, 0.25);
+  color: white;
+}
+
+.nz-input:focus {
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background-color: #FAFAFC;
+  color: #1E293B;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: #0F0A1A;
+  color: #FFFFFF;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #7C3AED; }

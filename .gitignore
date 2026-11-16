@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+
+# Environment variables & sensitive key files
+.env
+.env.*
+!.env.example
+env.local.js
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.secret
+*service-account*.json
+*serviceAccount*.json
+*credentials*.json
+
+# Build & framework caches (Next.js / Vercel / TypeScript)
+.next/
+out/
+build/
+dist/
+.turbo/
+.vercel/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local media cache, temporary scratch/patch/diagnostic scripts & backups
+storage/
+scratch/
+check_*.js
+patch_*.js
+inspect_*.js
+find_div_nesting.js
+full_step3.js
+clean_step3_redesign.js
+wizard_overhaul.js
+*.bak
+*.bak_*
+*.pre_overhaul_bak
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
